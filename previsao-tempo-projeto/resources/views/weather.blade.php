@@ -1,8 +1,8 @@
 <h1> Previsão do Tempo </h1> <!-- Exibição !-->
 
 <form>
-    <input name="city"
-    placeholder="Digite uma cidade">
+    <input name="city" 
+    placeholder="Digite uma cidade"> <!-- parâmetro city (cidade enviada) !-->
 
     <button>
         Buscar
@@ -12,7 +12,7 @@
 
 <hr>
 
-<h2>{{ $weather['city'] }}</h2>
+<h2>{{ $weather['city'] }}</h2>  <!-- exibe o return do parâmetro weather de WeatherController.php !-->
 
 <p>País: {{$weather['country'] }}</p>
 <p>Temperatura: {{$weather['temperature'] }} ºC</p>

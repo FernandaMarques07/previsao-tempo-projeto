@@ -1,7 +1,7 @@
 import requests # permite acessar sites e APIs (fazer requests)
 
-from app.cache.memory_cache import MemoryCache
-from app.config import CACHE_TTL
+from app.cache.memory_cache import MemoryCache 
+from app.config import CACHE_TTL # varíavel que guarda os 600 segundos em config.py
 
 class WeatherService:
     GEO_URL = "https://geocoding-api.open-meteo.com/v1/search" # coordenadas
@@ -12,17 +12,20 @@ class WeatherService:
 
     def get_weather(self, city): # permite usar as funções internas da classe/ espera receber
 
-        key = city.lower().strip()
+        key = city.lower().strip() # chave digitada -> cidade transformada em minúsculo e sem espaços extras (início e fim)
 
-        cached = self.cache.get(key)
-
+        cached = self.cache.get(key) # busca no cache se essa requisição foi feita nos últimos 10 min
+        if cached:
+            return cached
+        """        
         if cached:
             print("Resposta veio do CACHE")
             return cached
         
         print("Resposta veio da API")
+        """
 
-        # 1. Busca as coordenadas da cidade
+        # se não havia nada no cache: 1. Busca as coordenadas da cidade
         geo = requests.get(
             self.GEO_URL, # permite com que o programa encontre var globais
             params={
@@ -32,14 +35,14 @@ class WeatherService:
             timeout=5 # evita travamento
         )
 
-        geo.raise_for_status() # verificar status
+        geo.raise_for_status() # método para verificar status da api geo
 
         data = geo.json() # resposta 
 
         if "results" not in data:
             raise Exception("Cidade não encontrada.") # o raise para o código quando não encontra o resultado em data
         
-        place = data["results"][0] # guarda o resultado 1, isso é uma array
+        place = data["results"][0] # guarda o resultado 1, isso é uma array na var place
 
         latitude = place["latitude"]
         longitude = place["longitude"]
@@ -55,22 +58,22 @@ class WeatherService:
             timeout=5 # evita travamentos
         )
 
-        weather.raise_for_status()
+        weather.raise_for_status() # status da api weather
 
-        current = weather.json()["current"]
+        current = weather.json()["current"] # resposta -> dicionário; extrai apenas a parte "current" que contém o clima atual.
 
         result = {
-            "city": place["name"],
+            "city": place["name"], # traz o resultado obtido na var place, o nome da cidade é salvo em city, no dicionário result
             "country": place["country"],
-            "temperature": current["temperature_2m"],
+            "temperature": current["temperature_2m"], # traz o resultado atual de temperatura, humidade e vento
             "humidity": current["relative_humidity_2m"],
             "wind": current["wind_speed_10m"]
         }
     
-        self.cache.set(
-            key,
-            result,
-            CACHE_TTL
+        self.cache.set( # define/salva na memória, no cache para futuras requisições
+            key, # nome da cidade
+            result, # resultado obtido pela api
+            CACHE_TTL # expira em 600 segundos
         )
 
-        return result
+        return result # retorna o resultado, as informações requisitadas
