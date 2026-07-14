@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from services.weather_service import WeatherService
+from .services.weather_service import WeatherService
 
 app = FastAPI()
 

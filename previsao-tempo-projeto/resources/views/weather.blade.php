@@ -1,4 +1,4 @@
-<h1> Previsão do Tempo </h1>
+<h1> Previsão do Tempo </h1> <!-- Exibição !-->
 
 <form>
     <input name="city"

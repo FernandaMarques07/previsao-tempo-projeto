@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\WeatherApiService;
+
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class WeatherController extends Controller
 {
-    public function index(Request $request)
+    public function index(
+        Request $request,
+        WeatherApiService $service
+        )
     {
-        $city = $request->input('city', 'São Paulo');
-
-        $response = Http::get(
-            'http://127.0.0.1:5000/weather',
-            [
-                'city' => $city
-            ]
+        $city = $request->input(
+            'city'
         );
 
         return view('weather', [
-            'weather' => $response->json()
-        ]);
+            'weather' => $service->getWeather($city)
+            ]
+        );
     }
 }
