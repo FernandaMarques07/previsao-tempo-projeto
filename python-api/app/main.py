@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request # fastAPI -> cria a API; HTTPException -> retorna os erros HTTP de forma limpa
+from fastapi import FastAPI, HTTPException, Request, Depends # fastAPI -> cria a API; HTTPException -> retorna os erros HTTP de forma limpa
 
 from fastapi.responses import JSONResponse # resposta http no formato json
 
@@ -6,10 +6,13 @@ from .services.weather_service import WeatherService # importa dentro da pasta s
 
 from app.models.weather_response import WeatherResponse # Formato de Dados (DTO - Data Transfer Object)
 
-from .gateways.weather_gateway import WeatherGateway  # comunicação externa
+from .gateways.open_meteo_gateway import OpenMeteoGateway  # comunicação externa
 
 from app.exceptions.city_not_found import CityNotFoundException # tratamento de erros
 from app.exceptions.external_api import ExternalApiException
+
+from app.providers.weather_provider import get_weather_service
+
 
 import logging # Importa a biblioteca nativa de logs do Python
 
@@ -23,7 +26,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI() # cria a instância app (que mostra pro server quais rotas existem)
 # instância é um objeto criado a partir de uma classe (molde de atributos e métodos)
 
-gateway = WeatherGateway()
+gateway = OpenMeteoGateway()
 service = WeatherService(gateway=gateway)
 
 
@@ -65,24 +68,17 @@ async def external_api_handler(
     )
 
 @app.get( # @ -> decorador -> use a função abaixo a partir das funcionalidades de app 
-        "/weather",
-        response_model=WeatherResponse
-        ) 
+        "/weather") 
 
 # Como seria sem o @ - teria que registrar a rota manualmente depois:
 # def weather(city: str):
 #    return service.get_weather(city)
 # app.add_api_route("/weather", weather, methods=["GET"])
 
-def weather(city: str) -> WeatherResponse: 
-    # define a função weather (que exige a str city)
-    # "->" Type Hinting (Indicação de Tipo) de retorno 
-    try:
-        return service.get_weather(city) # tente retornar algo da api a partir do serviço get_weather que vem da função WeatherService
-    except (CityNotFoundException, ExternalApiException):
-        raise
-    except Exception as e: # se não for possível, levantar a exceção, guardá-la como "e"
-        raise HTTPException(
-            status_code=404,
-            detail=str(e) # erro 404 - detail: erro guardado em "e" (ex: Not Found)
-        )
+def weather(
+    city: str,
+    service: WeatherService = Depends(
+        get_weather_service
+    ) 
+):
+    return service.get_weather(city)

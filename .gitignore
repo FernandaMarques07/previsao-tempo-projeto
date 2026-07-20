@@ -1,3 +1,27 @@
+# Arquivos compilados do Python
 __pycache__/
-*.pycgit status
-*.pyc
+*.py[cod]
+*$py.class
+
+# Ambientes Virtuais
+.venv/
+venv/
+ENV/
+env/
+
+# Testes e Cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Variáveis de Ambiente e Segredos
+.env
+.env.local
+
+# Configurações de IDEs
+.vscode/
+.idea/
+
+# Sistema Operacional
+Thumbs.db
+.DS_Store

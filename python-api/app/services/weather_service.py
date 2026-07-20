@@ -1,15 +1,17 @@
+# Recebe o gateway pelo construtor e gerencia o cache
 from app.models.weather_response import WeatherResponse # modelo WeatherResponse
 
 from app.cache.memory_cache import MemoryCache 
 
 from app.config import CACHE_TTL # varíavel que guarda os 600 segundos em config.py
 
-from app.gateways.weather_gateway import WeatherGateway
+from app.gateways.open_meteo_gateway import WeatherGateway
+
 
 class WeatherService:
     
-    def __init__(self, gateway):
-        self.geteway = WeatherGateway()
+    def __init__(self, gateway: WeatherGateway):
+        self.gateway = gateway
         self.cache = MemoryCache()
 
     def get_weather(self, city) -> WeatherResponse: # self - permite usar as funções da classe/ espera receber
@@ -22,7 +24,7 @@ class WeatherService:
             return cached
 
 
-        weather = self.geteway.get_weather(city)
+        weather = self.gateway.get_weather(city)
 
         self.cache.set(
             key, weather, CACHE_TTL
